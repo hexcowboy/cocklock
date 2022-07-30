@@ -1,0 +1,10 @@
+[package]
+name = "cocklock"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+postgres = "0.19.3"
+tokio-postgres = "0.7.6"
+postgres-native-tls = "0.5.0"
+native-tls = "0.2.10"
