@@ -3,16 +3,28 @@ use std::fs;
 use native_tls::{Certificate, TlsConnector};
 use postgres::{Client, NoTls};
 use postgres_native_tls::MakeTlsConnector;
+use uuid::Uuid;
 
 use crate::errors::CockLockError;
-use crate::lock::CockLock;
+use crate::lock::{CockLock, DEFAULT_TABLE};
 
-#[derive(Default)]
 pub struct CockLockBuilder {
     /// List of all Postgres/Cockroach clients
     clients: Vec<Client>,
     client_connection_strings: Vec<String>,
     tls_connector: Option<MakeTlsConnector>,
+    table_name: String,
+}
+
+impl Default for CockLockBuilder {
+    fn default() -> Self {
+        Self {
+            clients: vec![],
+            client_connection_strings: vec![],
+            tls_connector: None,
+            table_name: DEFAULT_TABLE.to_owned(),
+        }
+    }
 }
 
 /// A builder for the CockLock struct
@@ -30,6 +42,12 @@ impl CockLockBuilder {
         for connection_string in connection_strings {
             self.client_connection_strings.push(connection_string);
         }
+        self
+    }
+
+    /// Change the table name to be used for locks
+    pub fn with_table_name(mut self, table_name: String) -> Self {
+        self.table_name = table_name;
         self
     }
 
@@ -66,7 +84,7 @@ impl CockLockBuilder {
         self
     }
 
-    /// Build a CockLock struct using the builder
+    /// Build a CockLock instance using the builder
     pub fn build(self) -> Result<CockLock, CockLockError> {
         let mut clients = self.clients;
         match self.tls_connector {
@@ -86,6 +104,12 @@ impl CockLockBuilder {
             return Err(CockLockError::NoClients);
         }
 
-        Ok(CockLock { clients: vec![] })
+        let instance = CockLock::new(CockLock {
+            id: Uuid::new_v4().to_string(),
+            clients,
+            table_name: self.table_name,
+        })?;
+
+        Ok(instance)
     }
 }

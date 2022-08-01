@@ -6,6 +6,7 @@ pub enum CockLockError {
     NativeTlsError(native_tls::Error, String),
     PostgresError(postgres::Error),
     NoClients,
+    AlreadyLocked,
 }
 
 impl Display for CockLockError {
@@ -28,6 +29,9 @@ impl Display for CockLockError {
             }
             CockLockError::NoClients => {
                 write!(f, "No clients provided to CockLock")
+            }
+            CockLockError::AlreadyLocked => {
+                write!(f, "The namespace is already locked")
             }
         }
     }

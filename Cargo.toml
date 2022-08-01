@@ -8,3 +8,4 @@ postgres = "0.19.3"
 tokio-postgres = "0.7.6"
 postgres-native-tls = "0.5.0"
 native-tls = "0.2.10"
+uuid = { version="1.1.2", features=["v4", "fast-rng"] }
