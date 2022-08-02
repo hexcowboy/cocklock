@@ -38,9 +38,10 @@ impl CockLockBuilder {
     }
 
     /// Add some client connection strings
-    pub fn with_connection_strings(mut self, connection_strings: Vec<String>) -> Self {
+    pub fn with_connection_strings(mut self, connection_strings: Vec<&str>) -> Self {
         for connection_string in connection_strings {
-            self.client_connection_strings.push(connection_string);
+            self.client_connection_strings
+                .push(connection_string.to_owned());
         }
         self
     }
