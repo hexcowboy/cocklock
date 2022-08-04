@@ -42,9 +42,9 @@ impl CockLock {
 
         instance.queries = CockLockQueries {
             create_table: PG_TABLE_QUERY.replace("TABLE_NAME", &instance.table_name),
-            lock: PG_TABLE_QUERY.replace("TABLE_NAME", &instance.table_name),
-            unlock: PG_TABLE_QUERY.replace("TABLE_NAME", &instance.table_name),
-            clean_up: PG_TABLE_QUERY.replace("TABLE_NAME", &instance.table_name),
+            lock: PG_LOCK_QUERY.replace("TABLE_NAME", &instance.table_name),
+            unlock: PG_UNLOCK_QUERY.replace("TABLE_NAME", &instance.table_name),
+            clean_up: PG_CLEAN_UP_QUERY.replace("TABLE_NAME", &instance.table_name),
         };
 
         for client in instance.clients.iter_mut() {

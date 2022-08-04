@@ -112,9 +112,9 @@ impl CockLockBuilder {
             table_name: self.table_name.clone(),
             queries: CockLockQueries {
                 create_table: PG_TABLE_QUERY.replace("TABLE_NAME", &self.table_name),
-                lock: PG_TABLE_QUERY.replace("TABLE_NAME", &self.table_name),
-                unlock: PG_TABLE_QUERY.replace("TABLE_NAME", &self.table_name),
-                clean_up: PG_TABLE_QUERY.replace("TABLE_NAME", &self.table_name),
+                lock: PG_LOCK_QUERY.replace("TABLE_NAME", &self.table_name),
+                unlock: PG_UNLOCK_QUERY.replace("TABLE_NAME", &self.table_name),
+                clean_up: PG_CLEAN_UP_QUERY.replace("TABLE_NAME", &self.table_name),
             },
         })?;
 

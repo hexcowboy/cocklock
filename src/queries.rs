@@ -38,7 +38,7 @@ where
     and lock_name = $2;
 ";
 
-pub static PG_CLEAN_UP: &str = "
+pub static PG_CLEAN_UP_QUERY: &str = "
 drop trigger if exists _lock_reap_trigger on TABLE_NAME;
 drop function if exists _lock_reap();
 drop table if exists TABLE_NAME;
