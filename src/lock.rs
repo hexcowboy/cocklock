@@ -7,6 +7,13 @@ use crate::queries::*;
 
 pub static DEFAULT_TABLE: &str = "_locks";
 
+pub(crate) struct CockLockQueries {
+    pub create_table: String,
+    pub lock: String,
+    pub unlock: String,
+    pub clean_up: String,
+}
+
 /// The lock manager
 ///
 /// Implements the necessary functionality to acquire and release locks
@@ -17,6 +24,7 @@ pub struct CockLock {
     /// List of all Postgres/Cockroach clients
     pub clients: Vec<Client>,
     pub table_name: String,
+    pub(crate) queries: CockLockQueries,
 }
 
 impl CockLock {
@@ -32,11 +40,15 @@ impl CockLock {
     pub fn new(cock_lock: CockLock) -> Result<Self, CockLockError> {
         let mut instance = cock_lock;
 
+        instance.queries = CockLockQueries {
+            create_table: PG_TABLE_QUERY.replace("TABLE_NAME", &instance.table_name),
+            lock: PG_TABLE_QUERY.replace("TABLE_NAME", &instance.table_name),
+            unlock: PG_TABLE_QUERY.replace("TABLE_NAME", &instance.table_name),
+            clean_up: PG_TABLE_QUERY.replace("TABLE_NAME", &instance.table_name),
+        };
+
         for client in instance.clients.iter_mut() {
-            client.execute(
-                &PG_TABLE_QUERY.replace("TABLE_NAME", &instance.table_name),
-                &[&instance.table_name],
-            )?;
+            client.execute(&instance.queries.create_table, &[&instance.table_name])?;
         }
 
         Ok(instance)
@@ -54,10 +66,7 @@ impl CockLock {
     /// simply overrides the timeout on the lock.
     pub fn lock(&mut self, lock_name: &str, timeout_ms: u32) -> Result<(), CockLockError> {
         for client in self.clients.iter_mut() {
-            let result = client.execute(
-                &PG_LOCK_QUERY.replace("TABLE_NAME", &self.table_name),
-                &[&self.id, &lock_name, &timeout_ms],
-            );
+            let result = client.execute(&self.queries.lock, &[&self.id, &lock_name, &timeout_ms]);
 
             if let Err(err) = result {
                 match err.code() {
@@ -75,10 +84,7 @@ impl CockLock {
     /// Try to release the lock on all clients
     pub fn unlock(&mut self, lock_name: &str) -> Result<(), CockLockError> {
         for client in self.clients.iter_mut() {
-            client.execute(
-                &PG_UNLOCK_QUERY.replace("TABLE_NAME", &self.table_name),
-                &[&self.id, &lock_name],
-            )?;
+            client.execute(&self.queries.unlock, &[&self.id, &lock_name])?;
         }
 
         Ok(())
@@ -87,7 +93,7 @@ impl CockLock {
     /// Remove the tables and functions that were created by CockLock
     pub fn clean_up(&mut self) -> Result<(), CockLockError> {
         for client in self.clients.iter_mut() {
-            client.execute(&PG_CLEAN_UP.replace("TABLE_NAME", &self.table_name), &[])?;
+            client.execute(&self.queries.clean_up, &[])?;
         }
 
         Ok(())
