@@ -7,6 +7,8 @@ pub enum CockLockError {
     PostgresError(postgres::Error),
     NoClients,
     NotAvailable,
+    ClientNotAvailable,
+    NoClientsAvailable,
 }
 
 impl Display for CockLockError {
@@ -32,6 +34,12 @@ impl Display for CockLockError {
             }
             CockLockError::NotAvailable => {
                 write!(f, "The namespace is already locked")
+            }
+            CockLockError::ClientNotAvailable => {
+                write!(f, "The client was not available")
+            }
+            CockLockError::NoClientsAvailable => {
+                write!(f, "All clients could not be reached")
             }
         }
     }

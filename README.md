@@ -12,10 +12,6 @@ A Decentralized Locking System (DLS) made for CockroachDB and Postgres written i
 
 <hr />
 
-⚠️ This project is not released and I haven't written tests yet. Please don't use, I promise I will finish it soon.
-
-<hr />
-
 ## Install
 
 Not published to crates.io yet, check back later.

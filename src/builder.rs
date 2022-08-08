@@ -4,7 +4,6 @@ use uuid::Uuid;
 
 use crate::errors::CockLockError;
 use crate::lock::{CockLock, CockLockQueries, DEFAULT_TABLE};
-use crate::queries::*;
 
 pub struct CockLockBuilder {
     /// List of all Postgres/Cockroach clients
@@ -77,9 +76,9 @@ impl CockLockBuilder {
         }
 
         let instance = CockLock::new(CockLock {
-            id: Uuid::new_v4().to_string(),
+            id: Uuid::new_v4(),
             clients,
-            table_name: self.table_name.clone(),
+            table_name: self.table_name,
             queries: CockLockQueries::default(),
         })?;
 

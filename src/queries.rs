@@ -11,7 +11,7 @@ returns trigger as $$
         delete from TABLE_NAME
         where
             TABLE_NAME.expires_at is not null
-            and now() > now() - TABLE_NAME.expires_at;
+            and now() > TABLE_NAME.expires_at;
         return null;
     end;
 $$ language plpgsql;
@@ -24,12 +24,12 @@ create or replace trigger _lock_reap_trigger
 
 pub static PG_LOCK_QUERY: &str = "
 insert into TABLE_NAME (client_id, lock_name, expires_at)
-select $1, $2, now() + 'interval ' || $3 || ' milliseconds'
+select $1, $2, now() + ($3::int || ' milliseconds')::interval
 on conflict (lock_name) do update
-    set expires_at = now() + 'interval ' || $3 || ' milliseconds'
+    set expires_at = now() + ($3::int || ' milliseconds')::interval
     where
-        client_id = exlcluded.client_id
-        and lock_name = exlcluded.lock_name;
+        TABLE_NAME.client_id = excluded.client_id
+        and TABLE_NAME.lock_name = excluded.lock_name;
 ";
 
 pub static PG_UNLOCK_QUERY: &str = "

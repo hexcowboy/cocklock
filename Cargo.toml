@@ -10,11 +10,11 @@ homepage = "https://github.com/hexcowboy/cock-lock"
 repository = "https://github.com/hexcowboy/cock-lock"
 
 [dependencies]
-postgres = "0.19.3"
+postgres = { version = "0.19", features = ["with-uuid-1"] }
 tokio-postgres = "0.7.6"
 postgres-native-tls = "0.5.0"
 native-tls = "0.2.10"
-uuid = { version="1.1.2", features=["v4", "fast-rng"] }
+uuid = { version = "1.0.0", features = ["v4", "fast-rng"] }
 
 [dev-dependencies]
 testcontainers = "0.14.0"
