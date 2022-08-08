@@ -16,8 +16,10 @@ fn main() {
     loop {
         match locker.lock("task", 10_000) {
             Ok(_) => my_task(),
-            Err(NotAvailable) => println!("Someone else is doing my task!"),
-            Err(err) => println!("Uh oh, some other error occurred: {err}"),
+            Err(err) => match err {
+                NotAvailable => println!("Someone else is doing my task!"),
+                _ => println!("Uh oh, some other error occurred: {err}"),
+            },
         };
         sleep(Duration::from_millis(1_000));
     }
