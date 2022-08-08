@@ -1,6 +1,3 @@
-use std::fs;
-
-use native_tls::{Certificate, TlsConnector};
 use postgres::{Client, NoTls};
 use postgres_native_tls::MakeTlsConnector;
 use uuid::Uuid;
@@ -39,43 +36,18 @@ impl CockLockBuilder {
     }
 
     /// Add some client connection strings
-    pub fn with_connection_strings(mut self, connection_strings: Vec<&str>) -> Self {
+    pub fn with_connection_strings<T: ToString>(mut self, connection_strings: Vec<T>) -> Self {
         for connection_string in connection_strings {
             self.client_connection_strings
-                .push(connection_string.to_owned());
+                .push(connection_string.to_string());
         }
         self
     }
 
     /// Change the table name to be used for locks
-    pub fn with_table_name(mut self, table_name: String) -> Self {
-        self.table_name = table_name;
+    pub fn with_table_name<T: ToString>(mut self, table_name: T) -> Self {
+        self.table_name = table_name.to_string();
         self
-    }
-
-    /// Add a TLS certification which will be applied to all connections
-    pub fn with_cert(mut self, path_to_cert: &str) -> Result<Self, CockLockError> {
-        let cert = match fs::read(path_to_cert) {
-            Ok(cert) => cert,
-            Err(err) => {
-                return Err(CockLockError::CertificateFileError(
-                    err,
-                    path_to_cert.to_owned(),
-                ))
-            }
-        };
-        let cert = match Certificate::from_pem(&cert) {
-            Ok(cert) => cert,
-            Err(err) => return Err(CockLockError::NativeTlsError(err, path_to_cert.to_owned())),
-        };
-        let connector = match TlsConnector::builder().add_root_certificate(cert).build() {
-            Ok(connector) => connector,
-            Err(err) => return Err(CockLockError::NativeTlsError(err, path_to_cert.to_owned())),
-        };
-        let connector = MakeTlsConnector::new(connector);
-
-        self.tls_connector = Some(connector);
-        Ok(self)
     }
 
     /// Add custom clients
@@ -89,14 +61,12 @@ impl CockLockBuilder {
     /// Build a CockLock instance using the builder
     pub fn build(self) -> Result<CockLock, CockLockError> {
         let mut clients = self.clients;
-        match self.tls_connector {
-            Some(connector) => {
-                for connection_string in self.client_connection_strings {
+        for connection_string in self.client_connection_strings {
+            match &self.tls_connector {
+                Some(connector) => {
                     clients.push(Client::connect(&connection_string, connector.clone())?);
                 }
-            }
-            None => {
-                for connection_string in self.client_connection_strings {
+                None => {
                     clients.push(Client::connect(&connection_string, NoTls)?);
                 }
             }
@@ -110,12 +80,7 @@ impl CockLockBuilder {
             id: Uuid::new_v4().to_string(),
             clients,
             table_name: self.table_name.clone(),
-            queries: CockLockQueries {
-                create_table: PG_TABLE_QUERY.replace("TABLE_NAME", &self.table_name),
-                lock: PG_LOCK_QUERY.replace("TABLE_NAME", &self.table_name),
-                unlock: PG_UNLOCK_QUERY.replace("TABLE_NAME", &self.table_name),
-                clean_up: PG_CLEAN_UP_QUERY.replace("TABLE_NAME", &self.table_name),
-            },
+            queries: CockLockQueries::default(),
         })?;
 
         Ok(instance)

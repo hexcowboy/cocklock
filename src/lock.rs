@@ -7,6 +7,7 @@ use crate::queries::*;
 
 pub static DEFAULT_TABLE: &str = "_locks";
 
+#[derive(Default)]
 pub(crate) struct CockLockQueries {
     pub create_table: String,
     pub lock: String,
@@ -48,7 +49,7 @@ impl CockLock {
         };
 
         for client in instance.clients.iter_mut() {
-            client.execute(&instance.queries.create_table, &[&instance.table_name])?;
+            client.batch_execute(&instance.queries.create_table)?;
         }
 
         Ok(instance)
@@ -102,9 +103,62 @@ impl CockLock {
 
 #[cfg(test)]
 mod tests {
+    use testcontainers::{clients, images::postgres::Postgres, Container, RunnableImage};
+
+    use crate::CockLock;
+
     #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
+    fn new_creates_tables() {
+        let docker = clients::Cli::default();
+        let nodes: Vec<Container<Postgres>> = (1..=3)
+            .map(|_| {
+                let image = RunnableImage::from(Postgres::default()).with_tag("14-alpine");
+                docker.run(image)
+            })
+            .collect();
+
+        let connection_strings: Vec<String> = nodes
+            .iter()
+            .map(|node| {
+                format!(
+                    "postgres://postgres:postgres@127.0.0.1:{}/postgres",
+                    node.get_host_port_ipv4(5432)
+                )
+            })
+            .collect();
+
+        let cock_lock = CockLock::builder()
+            .with_connection_strings(connection_strings.clone())
+            .build()
+            .unwrap();
+
+        for connection_string in connection_strings {
+            let mut conn = postgres::Client::connect(&connection_string, postgres::NoTls).unwrap();
+            let row = conn
+                .query_one(
+                    "
+                    select exists (
+                        select from information_schema.tables
+                        where table_name = $1
+                    );
+                    ",
+                    &[&cock_lock.table_name],
+                )
+                .unwrap();
+            let exists: bool = row.get("exists");
+            assert!(exists);
+        }
     }
+
+    #[test]
+    fn tls_works() {}
+
+    #[test]
+    fn lock_works() {}
+
+    #[test]
+    fn unlock_works() {}
+
+    #[test]
+    fn cleanup_works() {}
 }

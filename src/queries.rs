@@ -5,12 +5,13 @@ create table if not exists TABLE_NAME (
     expires_at timestamp
 );
 
-create or replace function _lock_reap() returns trigger as $$
+create or replace function _lock_reap()
+returns trigger as $$
     begin
         delete from TABLE_NAME
         where
             TABLE_NAME.expires_at is not null
-        	and now() > now() - TABLE_NAME.expires_at;
+            and now() > now() - TABLE_NAME.expires_at;
         return null;
     end;
 $$ language plpgsql;
