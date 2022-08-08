@@ -51,4 +51,4 @@ fn main() {
 
 ## License
 
-Haven't picked a license yet but when I do it will be very permissive.
+[MIT License](/LICENSE)
