@@ -2,7 +2,7 @@
 
 > There is no better name for this project
 
-A Decentralized Locking System (DLS) made for CockroachDB and Postgres written in pure Rust. Motivation for this project was to create a DLS that didn't use the Redis Redlock protocol ([since I saw some nerds arguing about it on the internet](https://news.ycombinator.com/item?id=11065933)). This project also contains more features than traditional Redlock implementations.
+A Distributed Locking System (DLS) made for CockroachDB and Postgres written in pure Rust. Motivation for this project was to create a DLS that didn't use the Redis Redlock protocol ([since I saw some nerds arguing about it on the internet](https://news.ycombinator.com/item?id=11065933)). This project also contains more features than traditional Redlock implementations.
 
 <hr />
 
