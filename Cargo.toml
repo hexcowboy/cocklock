@@ -1,13 +1,18 @@
 [package]
 name = "cocklock"
 version = "0.1.0"
+authors = ["hexcowboy"]
 edition = "2021"
 
 keywords = ["distributed", "locking", "dls", "cockroachdb", "postgres"]
 description = "Implementation of the distributed locking mechanism built on top of Postgres/CockroachDB"
 
-homepage = "https://github.com/hexcowboy/cock-lock"
-repository = "https://github.com/hexcowboy/cock-lock"
+repository = "https://github.com/hexcowboy/cocklock"
+license = "MIT"
+license-file = "LICENSE"
+readme = "README.md"
+
+exclude = ["/.github", "/examples"]
 
 [dependencies]
 postgres = { version = "0.19", features = ["with-uuid-1"] }
