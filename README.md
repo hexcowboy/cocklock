@@ -15,7 +15,7 @@ A Distributed Locking System (DLS) made for CockroachDB and Postgres written in 
 ## Install
 
 ```toml
-// Cargo.toml
+# Cargo.toml
 [dependencies]
 cocklock = "0.1.0"
 ```
