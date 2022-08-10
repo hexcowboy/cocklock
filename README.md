@@ -14,7 +14,16 @@ A Distributed Locking System (DLS) made for CockroachDB and Postgres written in 
 
 ## Install
 
-Not published to crates.io yet, check back later.
+```rs
+# Cargo.toml
+cocklock = "0.1.0"
+```
+
+or
+
+```bash
+cargo install cocklock
+```
 
 <hr />
 
