@@ -9,7 +9,6 @@ description = "Implementation of the distributed locking mechanism built on top 
 
 repository = "https://github.com/hexcowboy/cocklock"
 license = "MIT"
-license-file = "LICENSE"
 readme = "README.md"
 
 exclude = ["/.github", "/examples"]
